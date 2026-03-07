@@ -1,4 +1,4 @@
-![Uploading portfolio_banner_final_7.png…]()
+<img width="1200" height="630" alt="portfolio_banner_final_7" src="https://github.com/user-attachments/assets/b8c87da4-3731-4536-ae0c-a7ed292e56c0" />
 
 
 # 🚀 Shubham Nale – Developer Portfolio

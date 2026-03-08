@@ -3093,6 +3093,10 @@ a:hover {
   font-weight: 600;
 }
 
+.mobile-br {
+  display: none;
+}
+
 .typed-cursor {
   display: inline-block;
   width: 2px;
@@ -3718,6 +3722,10 @@ section[id] {
     line-height: 1.6;
     margin-bottom: var(--spacing-lg);
     text-align: center;
+  }
+
+  .mobile-br {
+    display: inline;
   }
 
   .hero-title {

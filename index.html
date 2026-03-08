@@ -25,7 +25,7 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://shubhamnale.vercel.app/">
     <!-- Security: Content-Security-Policy (covers GitHub Pages which cannot set HTTP headers) -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://api.web3forms.com; worker-src blob: https://cdnjs.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self' https://api.web3forms.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://api.web3forms.com; worker-src blob: https://cdnjs.cloudflare.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self' https://api.web3forms.com;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <!-- Favicon: SN. logo -->
@@ -34,7 +34,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
     <!-- Preload LCP image for faster Largest Contentful Paint -->
     <link rel="preload" as="image" href="profile/main.png">
     <link rel="stylesheet" href="style.css">
@@ -101,14 +101,14 @@
                 <span></span><span></span><span></span>
             </button>
             <div class="nav-links" id="navLinks">
-                <a href="#about" class="nav-link">About</a>
-                <a href="#education" class="nav-link">Education</a>
-                <a href="#skills" class="nav-link">Skills</a>
-                <a href="#projects" class="nav-link">Projects</a>
-                <a href="#certificates" class="nav-link">Certificates</a>
-                <a href="#personal" class="nav-link">Interests</a>
-                <a href="#contact" class="nav-link">Contact</a>
-                <a href="#" class="nav-link nav-link-resume"><i class="fas fa-file-lines"></i> Resume</a>
+                <a href="#about" class="nav-link"><span class="nav-icon"><i class="fas fa-user"></i></span>About</a>
+                <a href="#education" class="nav-link"><span class="nav-icon"><i class="fas fa-graduation-cap"></i></span>Education</a>
+                <a href="#skills" class="nav-link"><span class="nav-icon"><i class="fas fa-code"></i></span>Skills</a>
+                <a href="#projects" class="nav-link"><span class="nav-icon"><i class="fas fa-rocket"></i></span>Projects</a>
+                <a href="#certificates" class="nav-link"><span class="nav-icon"><i class="fas fa-trophy"></i></span>Certificates</a>
+                <a href="#personal" class="nav-link"><span class="nav-icon"><i class="fas fa-heart"></i></span>Interests</a>
+                <a href="#contact" class="nav-link"><span class="nav-icon"><i class="fas fa-envelope"></i></span>Contact</a>
+                <a href="#" class="nav-link nav-link-resume"><span class="nav-icon"><i class="fas fa-file-lines"></i></span>Resume</a>
             </div>
             <button class="nav-resume-btn" id="openResumeModal" aria-label="View Resume">
                 <i class="fas fa-file-lines"></i>
@@ -319,6 +319,21 @@
                     <div class="skill-tags"><span class="skill-tag">Algorithms</span><span class="skill-tag">Logic</span><span class="skill-tag">Research</span></div>
                 </div>
             </div>
+            <!-- Currently Exploring -->
+            <div class="learning-path">
+                <div class="learning-path-header">
+                    <span class="learning-path-icon"><i class="fas fa-route"></i></span>
+                    <h3 class="learning-path-title">Currently Exploring</h3>
+                </div>
+                <div class="learning-pills">
+                    <span class="learning-pill learning-pill--now"><span class="lp-pulse"></span>Deep Learning</span>
+                    <span class="learning-pill learning-pill--now"><span class="lp-pulse"></span>Flask &amp; FastAPI</span>
+                    <span class="learning-pill learning-pill--next">React</span>
+                    <span class="learning-pill learning-pill--next">SQL &amp; Databases</span>
+                    <span class="learning-pill learning-pill--soon">Docker</span>
+                    <span class="learning-pill learning-pill--soon">Cloud Computing</span>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -400,6 +415,10 @@
                 <p class="section-subtitle">Industry-recognized credentials from IBM, Oracle, Tata, and more.</p>
             </div>
             <div class="certificates-grid">
+                <div class="certificate-card" data-cert="new">
+                    <img src="certificates/IBM1.jpg" alt="IBM1">     
+                    <h3>Artificial Intelligence Fundamentals</h3>
+                </div>
                 <div class="certificate-card" data-cert="new">
                     <img src="certificates/Coursera ULY4D3S9NEWN_page-0001.jpg" alt="IBM">     
                     <h3>Python for Data Science and AI & Development</h3>
@@ -561,6 +580,9 @@
     <!-- Cursor spotlight (desktop only) -->
     <div class="cursor-spotlight" id="cursorSpotlight" aria-hidden="true"></div>
 
+    <!-- ARIA live region: announces toast messages to screen readers -->
+    <div id="toastLiveRegion" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -601,7 +623,7 @@
     </div>
 
     <!-- Certificate Modal -->
-    <div class="cert-modal" id="certModal">
+    <div class="cert-modal" id="certModal" role="dialog" aria-modal="true" aria-labelledby="certModalTitle">
         <div class="cert-modal-overlay" id="certModalOverlay"></div>
         <div class="cert-modal-content">
             <div class="cert-modal-header">
@@ -618,7 +640,7 @@
     </div>
 
                 <!-- PDF.js must load before script.js (pdfjsLib used on modal open) -->
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e" crossorigin="anonymous"></script>
                 <script src="script.js"></script>
 </body>
 </html>

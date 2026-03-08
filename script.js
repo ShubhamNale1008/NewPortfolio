@@ -107,11 +107,16 @@
 
 // *** NAVBAR ACTIVE LINK INDICATOR + SMOOTH SCROLL ***
 (function () {
-  const NAV_HEIGHT = 70;
-  const sections   = Array.from(document.querySelectorAll('section[id]'));
-  const navLinks   = Array.from(document.querySelectorAll('.nav-link'));
-  let scrollLocked = false; // suppresses scroll-based detection during smooth scroll
+  const sections  = Array.from(document.querySelectorAll('section[id]'));
+  const navLinks  = Array.from(document.querySelectorAll('.nav-link'));
+  const navEl     = document.querySelector('.navbar');
+  let scrollLocked = false;
   let lockTimer    = null;
+
+  // Always read the real rendered navbar height so it works on all screen sizes
+  function navH() {
+    return navEl ? navEl.offsetHeight : 64;
+  }
 
   function setActive(id) {
     navLinks.forEach(link => {
@@ -129,22 +134,30 @@
 
     if (scrollY < 10) { clearActive(); return; }
 
-    if ((window.innerHeight + scrollY) >= document.documentElement.scrollHeight - 4) {
+    // If the page bottom is reached, always mark the last section active
+    if ((window.innerHeight + scrollY) >= document.documentElement.scrollHeight - 10) {
       setActive(sections[sections.length - 1].id);
       return;
     }
 
+    // A section is "active" when its top edge has crossed past the navbar bottom.
+    // We use navH() + 4 as a tiny sub-pixel buffer only.
+    const threshold = navH() + 4;
     let current = null;
     for (const section of sections) {
-      if (section.getBoundingClientRect().top - NAV_HEIGHT <= 1) {
+      if (section.getBoundingClientRect().top <= threshold) {
         current = section;
       }
     }
     if (current) setActive(current.id);
   }
 
-  // Handle nav link clicks: set active immediately, lock scroll detection
-  // until smooth scroll finishes (~800 ms covers most smooth scrolls).
+  function unlock() {
+    scrollLocked = false;
+    clearTimeout(lockTimer);
+    detectActive();
+  }
+
   navLinks.forEach(link => {
     link.addEventListener('click', function (e) {
       const href = this.getAttribute('href');
@@ -153,43 +166,48 @@
       const target = document.querySelector(href);
       if (!target) return;
 
-      // Immediately highlight the clicked link
-      const id = target.getAttribute('id');
-      setActive(id);
+      // Highlight the clicked link immediately — no waiting for scroll
+      setActive(target.getAttribute('id'));
 
-      // Suppress scroll-based detection while animating
+      // Lock scroll-based detection so mid-scroll positions don't override
       scrollLocked = true;
       clearTimeout(lockTimer);
+      window.removeEventListener('scrollend', unlock);
 
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Explicit offset scroll: section top lands exactly at navbar bottom.
+      // More reliable than scrollIntoView + scroll-margin-top across all browsers.
+      const scrollTarget = target.getBoundingClientRect().top + window.scrollY - navH();
+      window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
 
-      // Release lock after scroll animation completes
-      lockTimer = setTimeout(() => { scrollLocked = false; detectActive(); }, 900);
+      // Use the native scrollend event when available (fires exactly when scroll stops).
+      // Fall back to a generous timeout for older browsers.
+      if ('onscrollend' in window) {
+        window.addEventListener('scrollend', unlock, { once: true });
+        // Safety net: if scrollend somehow doesn't fire, unlock after 1.5 s
+        lockTimer = setTimeout(unlock, 1500);
+      } else {
+        lockTimer = setTimeout(unlock, 1200);
+      }
     });
   });
 
-  // Handle all other anchor clicks (e.g. logo, CTA buttons)
+  // Handle all other anchor clicks (e.g. hero CTA, logo)
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    if (anchor.classList.contains('nav-link')) return; // already handled above
+    if (anchor.classList.contains('nav-link')) return;
     anchor.addEventListener('click', function (e) {
       const href = this.getAttribute('href');
       if (!href || href === '#') return;
       e.preventDefault();
       const target = document.querySelector(href);
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (!target) return;
+      const scrollTarget = target.getBoundingClientRect().top + window.scrollY - navH();
+      window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
     });
   });
 
   window.addEventListener('scroll', detectActive, { passive: true });
   detectActive(); // run once on load
 })();
-
-// *** NAVBAR SCROLL STATE ***
-const navbar = document.querySelector('.navbar');
-
-window.addEventListener('scroll', () => {
-  navbar.classList.toggle('scrolled', window.scrollY > 50);
-}, { passive: true });
 
 // *** CONTACT FORM HANDLER ***
 (function () {
@@ -204,6 +222,13 @@ window.addEventListener('scroll', () => {
   // ─────────────────────────────────────────────────────────────────────────
 
   function showToast(msg, isError = false) {
+    // Announce to screen readers via ARIA live region
+    const liveRegion = document.getElementById('toastLiveRegion');
+    if (liveRegion) {
+      liveRegion.textContent = '';
+      setTimeout(() => { liveRegion.textContent = msg; }, 50);
+    }
+
     const toast = document.createElement('div');
     toast.textContent = msg;
     toast.style.cssText = `
@@ -251,7 +276,7 @@ window.addEventListener('scroll', () => {
     const message = document.getElementById('cf-message')?.value.trim() || '';
 
     // ── Validation ──
-    if (!name || !email || !message) {
+    if (!name || !email || !subject || !message) {
       showToast('Please fill in all required fields.', true);
       return;
     }
@@ -305,24 +330,6 @@ window.addEventListener('scroll', () => {
 })();
 
 // *** PERFORMANCE OPTIMIZATIONS ***
-// Lazy load images if they existed
-document.addEventListener('DOMContentLoaded', () => {
-  const images = document.querySelectorAll('img[loading=\"lazy\"]');
-  if ('IntersectionObserver' in window) {
-    const imageObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target;
-          img.src = img.dataset.src;
-          img.classList.remove('lazy');
-          imageObserver.unobserve(img);
-        }
-      });
-    });
-    
-    images.forEach(img => imageObserver.observe(img));
-  }
-});
 
 // *** KEYBOARD SHORTCUTS ***
 document.addEventListener('keydown', (e) => {
@@ -528,32 +535,31 @@ document.addEventListener('keydown', (e) => {
   if (el) el.textContent = new Date().getFullYear();
 })();
 
-console.log('Portfolio loaded! Press H, A, E (Education), S, P (Projects), W (Certificates), or C for quick navigation.');
+// *** SCROLL-DRIVEN UI — single RAF-debounced listener ***
+(() => {
+  const navbar     = document.querySelector('.navbar');
+  const scrollProg = document.getElementById('scrollProgress');
+  const backToTop  = document.getElementById('backToTop');
+  let ticking = false;
 
-// *** SCROLL PROGRESS BAR ***
-const scrollProgress = document.getElementById('scrollProgress');
-window.addEventListener('scroll', () => {
-  const scrollTop = window.scrollY || document.documentElement.scrollTop;
-  const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-  if (scrollProgress) scrollProgress.style.width = pct + '%';
-}, { passive: true });
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const scrollY   = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      if (navbar)     navbar.classList.toggle('scrolled', scrollY > 50);
+      if (scrollProg) scrollProg.style.width = (docHeight > 0 ? (scrollY / docHeight) * 100 : 0) + '%';
+      if (backToTop)  backToTop.classList.toggle('visible', scrollY > 400);
+      ticking = false;
+    });
+  }
 
-// *** BACK TO TOP BUTTON ***
-const backToTopBtn = document.getElementById('backToTop');
-if (backToTopBtn) {
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 400) {
-      backToTopBtn.classList.add('visible');
-    } else {
-      backToTopBtn.classList.remove('visible');
-    }
-  }, { passive: true });
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll(); // apply initial state without waiting for first scroll
 
-  backToTopBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
+  backToTop?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+})();
 
 // *** TYPING ANIMATION ***
 (function () {
